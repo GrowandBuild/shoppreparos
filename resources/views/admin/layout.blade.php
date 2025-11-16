@@ -16,11 +16,6 @@
     
     <!-- Custom Styles -->
     <style>
-        .sidebar-link.active {
-            background-color: #3b82f6;
-            color: white;
-        }
-        
         /* Animações para o menu mobile */
         .sidebar-mobile {
             transform: translateX(-100%);
@@ -46,147 +41,145 @@
             pointer-events: auto;
         }
         
-        /* Garantir que o menu mobile funcione em todos os dispositivos */
         @media (max-width: 1023px) {
             .sidebar-mobile {
                 display: block !important;
             }
             
-            /* Garantir que o botão hambúrguer seja visível */
             #mobile-menu-btn {
                 display: block !important;
             }
             
-            /* Garantir que o overlay seja visível quando necessário */
             .sidebar-overlay.open {
                 display: block !important;
             }
         }
         
-        /* Estilos adicionais para o menu mobile */
         .sidebar-link {
             display: flex;
             align-items: center;
-            padding: 0.75rem 1rem;
-            color: #374151;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            color: #1f2937;
             text-decoration: none;
-            border-radius: 0.5rem;
-            margin-bottom: 0.5rem;
+            border-radius: 0.85rem;
             transition: all 0.2s ease-in-out;
+            font-weight: 500;
         }
-        
+
         .sidebar-link:hover {
-            background-color: #f3f4f6;
-            color: #111827;
+            background-color: rgba(59, 130, 246, 0.08);
+            color: #0f172a;
+            transform: translateX(4px);
         }
-        
+
         .sidebar-link.active {
-            background-color: #3b82f6;
+            background-image: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%);
             color: white;
+            box-shadow: 0 16px 35px -20px rgba(37, 99, 235, 0.6);
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div class="flex h-screen">
-        <!-- Sidebar Desktop (oculto em mobile) -->
-        <div class="hidden lg:flex lg:w-64 bg-white shadow-lg flex-col">
-            <div class="flex items-center justify-center h-16 border-b border-gray-200">
-                <img src="{{ asset('img/logohorizontal.png') }}" alt="Shopp Reparos" class="h-8">
+<body class="bg-slate-100">
+    <div class="flex min-h-screen">
+        <aside class="relative hidden lg:flex lg:w-72 flex-col overflow-hidden border-r border-slate-200 bg-gradient-to-b from-white via-slate-50 to-slate-100 shadow-xl">
+            <div class="relative flex items-center justify-center h-20 border-b border-slate-200 px-6">
+                <img src="{{ asset('img/logohorizontal.png') }}" alt="Shopp Reparos" class="h-10">
             </div>
-            
-            <nav class="mt-8 flex-1">
-                <div class="px-4 mb-4">
-                    <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Menu Principal</h3>
+            <nav class="flex flex-1 flex-col overflow-y-auto px-6 py-8">
+                <div class="space-y-6">
+                    <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Menu Principal</p>
+                        <div class="mt-4 space-y-2">
+                            <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                                <i class="fas fa-tachometer-alt w-5"></i>
+                                Dashboard
+                            </a>
+                            <a href="{{ route('admin.posts.index') }}" class="sidebar-link {{ request()->routeIs('admin.posts.*') ? 'active' : '' }}">
+                                <i class="fas fa-blog w-5"></i>
+                                Blog
+                                <span class="ml-auto rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-semibold text-blue-700">
+                                    {{ \App\Models\Post::count() }}
+                                </span>
+                            </a>
+                            <a href="{{ route('admin.banners.index') }}" class="sidebar-link {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
+                                <i class="fas fa-images w-5"></i>
+                                Banners
+                            </a>
+                            <a href="{{ route('admin.usuarios.index') }}" class="sidebar-link {{ request()->routeIs('admin.usuarios.*') ? 'active' : '' }}">
+                                <i class="fas fa-users w-5"></i>
+                                Usuários
+                            </a>
+                            <a href="{{ route('admin.servicos.index') }}" class="sidebar-link {{ request()->routeIs('admin.servicos.*') ? 'active' : '' }}">
+                                <i class="fas fa-tools w-5"></i>
+                                Serviços
+                            </a>
+                            <a href="{{ route('admin.produtos.index') }}" class="sidebar-link {{ request()->routeIs('admin.produtos.*') ? 'active' : '' }}">
+                                <i class="fas fa-box w-5"></i>
+                                Produtos
+                            </a>
+                            <a href="{{ route('admin.categorias.index') }}" class="sidebar-link {{ request()->routeIs('admin.categorias.*') ? 'active' : '' }}">
+                                <i class="fas fa-tags w-5"></i>
+                                Categorias
+                            </a>
+                            <a href="{{ route('admin.ordem_servicos.index') }}" class="sidebar-link {{ request()->routeIs('admin.ordem_servicos.*') ? 'active' : '' }}">
+                                <i class="fas fa-clipboard-list w-5"></i>
+                                Ordens de Serviço
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                
-                <a href="{{ route('admin.dashboard') }}" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-tachometer-alt w-5 h-5 mr-3"></i>
-                    Dashboard
-                </a>
-                
-                <a href="{{ route('admin.posts.index') }}" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ request()->routeIs('admin.posts.*') ? 'active' : '' }}">
-                    <i class="fas fa-blog w-5 h-5 mr-3"></i>
-                    Blog
-                    <span class="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                        {{ \App\Models\Post::count() }}
-                    </span>
-                </a>
-                
-                <a href="{{ route('admin.banners.index') }}" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
-                    <i class="fas fa-images w-5 h-5 mr-3"></i>
-                    Banners
-                </a>
-                
-                <a href="{{ route('admin.usuarios.index') }}" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ request()->routeIs('admin.usuarios.*') ? 'active' : '' }}">
-                    <i class="fas fa-users w-5 h-5 mr-3"></i>
-                    Usuários
-                </a>
-
-                <a href="{{ route('admin.servicos.index') }}" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ request()->routeIs('admin.servicos.*') ? 'active' : '' }}">
-                    <i class="fas fa-tools w-5 h-5 mr-3"></i>
-                    Serviços
-                </a>
-
-                <a href="{{ route('admin.produtos.index') }}" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ request()->routeIs('admin.produtos.*') ? 'active' : '' }}">
-                    <i class="fas fa-box w-5 h-5 mr-3"></i>
-                    Produtos
-                </a>
-
-                <a href="{{ route('admin.categorias.index') }}" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ request()->routeIs('admin.categorias.*') ? 'active' : '' }}">
-                    <i class="fas fa-tags w-5 h-5 mr-3"></i>
-                    Categorias
-                </a>
-
-                <a href="{{ route('admin.ordem_servicos.index') }}" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ request()->routeIs('admin.ordem_servicos.*') ? 'active' : '' }}">
-                    <i class="fas fa-clipboard-list w-5 h-5 mr-3"></i>
-                    Ordens de Serviço
-                </a>
-
-                <div class="px-4 mt-8 mb-4">
-                    <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Site</h3>
+                <div class="mt-auto space-y-3 pt-10">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400">Site</p>
+                    <div class="space-y-2">
+                        <a href="/blog" target="_blank" class="sidebar-link">
+                            <i class="fas fa-external-link-alt w-5"></i>
+                            Ver Blog
+                        </a>
+                        <a href="/" target="_blank" class="sidebar-link">
+                            <i class="fas fa-home w-5"></i>
+                            Ver Site
+                        </a>
+                    </div>
                 </div>
-                
-                <a href="/blog" target="_blank" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100">
-                    <i class="fas fa-external-link-alt w-5 h-5 mr-3"></i>
-                    Ver Blog
-                </a>
-                
-                <a href="/" target="_blank" class="sidebar-link flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100">
-                    <i class="fas fa-home w-5 h-5 mr-3"></i>
-                    Ver Site
-                </a>
             </nav>
-        </div>
+
+        </aside>
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Top Header -->
-            <header class="bg-white shadow-sm border-b border-gray-200">
-                <div class="flex items-center justify-between px-4 lg:px-6 py-6">
-                    <!-- Mobile Menu Button -->
-                    <button id="mobile-menu-btn" class="lg:hidden p-2 text-gray-600 hover:text-gray-900 focus:outline-none">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                    
-                    <div class="flex-1 text-center lg:text-left">
-                        <h1 class="text-xl lg:text-2xl font-semibold text-gray-900">@yield('title', 'Dashboard')</h1>
-                    </div>
-                    
-                    <div class="flex items-center space-x-4">
-                        <span class="hidden sm:inline text-sm text-gray-600">Olá, {{ auth()->user()->name }}</span>
-                        <form method="POST" action="{{ route('logout') }}" class="inline">
-                            @csrf
-                            <button type="submit" class="text-sm text-red-600 hover:text-red-800 px-3 py-1 rounded hover:bg-red-50">
-                                <i class="fas fa-sign-out-alt mr-1"></i>
-                                <span class="hidden sm:inline">Sair</span>
+            <header class="relative border-b border-slate-200 bg-gradient-to-r from-white via-white to-indigo-50/50">
+                <div class="pointer-events-none absolute inset-y-0 right-0 hidden w-64 translate-x-1/3 rounded-full bg-cyan-400/20 blur-3xl lg:block"></div>
+                <div class="pointer-events-none absolute -top-16 left-12 hidden h-40 w-40 rounded-full bg-indigo-500/20 blur-3xl lg:block"></div>
+                <div class="relative flex flex-col gap-4 px-4 py-6 lg:px-8">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <button id="mobile-menu-btn" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm transition hover:border-indigo-200 hover:text-indigo-600 lg:hidden">
+                                <i class="fas fa-bars text-lg"></i>
                             </button>
-                        </form>
+                            <div class="text-left">
+                                <p class="text-[11px] uppercase tracking-[0.35em] text-slate-400">Painel administrativo</p>
+                                <h1 class="text-xl font-semibold text-slate-900 lg:text-2xl">@yield('title', 'Dashboard')</h1>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="hidden sm:inline text-sm text-slate-600">Olá, {{ auth()->user()->name }}</span>
+                            <form method="POST" action="{{ route('logout') }}" class="inline">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span class="hidden sm:inline">Sair</span>
+                                </button>
+                            </form>
+                        </div>
                     </div>
+                    <p class="text-sm text-slate-500 lg:max-w-3xl">Organize conteúdos, banners e serviços com uma experiência visual refinada e intuitiva.</p>
                 </div>
             </header>
 
             <!-- Page Content -->
-            <main class="flex-1 overflow-x-hidden overflow-y-auto p-4 lg:p-6 pt-8">
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50/60 px-4 pb-8 pt-8 lg:px-8">
                 @yield('content')
             </main>
         </div>
