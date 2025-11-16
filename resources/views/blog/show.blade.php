@@ -604,6 +604,10 @@
     cursor: pointer;
 }
 
+.admin-inline-controls button i {
+    font-size: 0.875rem;
+}
+
 .admin-inline-controls button.admin-primary {
     background: linear-gradient(135deg, #2563eb, #7c3aed);
 }
@@ -1018,6 +1022,10 @@
         <i class="fas fa-save"></i>
         Salvar
     </button>
+    <button id="admin-insert-image" class="admin-muted hidden" disabled>
+        <i class="fas fa-image"></i>
+        Imagem (URL)
+    </button>
     <button id="admin-cancel-edit" class="admin-muted hidden">
         <i class="fas fa-xmark"></i>
         Cancelar
@@ -1108,6 +1116,7 @@ function setupAdminInlineEditing() {
 
     const toggleBtn = document.getElementById('admin-edit-toggle');
     const saveBtn = document.getElementById('admin-save-changes');
+    const insertImageBtn = document.getElementById('admin-insert-image');
     const cancelBtn = document.getElementById('admin-cancel-edit');
     const titleEl = document.getElementById('post-title');
     let excerptEl = document.getElementById('post-excerpt');
@@ -1143,6 +1152,7 @@ function setupAdminInlineEditing() {
             toggleBtn,
             saveBtn,
             cancelBtn,
+            insertImageBtn,
             titleEl,
             excerptEl,
             contentEl
@@ -1155,6 +1165,7 @@ function setupAdminInlineEditing() {
             toggleBtn,
             saveBtn,
             cancelBtn,
+            insertImageBtn,
             titleEl,
             excerptEl,
             contentEl,
@@ -1168,15 +1179,26 @@ function setupAdminInlineEditing() {
             toggleBtn,
             saveBtn,
             cancelBtn,
+            insertImageBtn,
             titleEl,
             excerptEl,
             contentEl
         });
     });
+
+    if (insertImageBtn) {
+        insertImageBtn.addEventListener('click', function handleInsertClick() {
+            if (!inlineEditorInstance) {
+                insertImageBtn.disabled = true;
+                return;
+            }
+            promptImageInsert(inlineEditorInstance);
+        });
+    }
 }
 
 function enterAdminEditMode(context) {
-    const { controls, toggleBtn, saveBtn, cancelBtn, titleEl, excerptEl, contentEl } = context;
+    const { controls, toggleBtn, saveBtn, cancelBtn, insertImageBtn, titleEl, excerptEl, contentEl } = context;
 
     adminEditing = true;
     document.body.classList.add('admin-editing-active');
@@ -1185,6 +1207,10 @@ function enterAdminEditMode(context) {
     saveBtn.classList.remove('hidden');
     cancelBtn.classList.remove('hidden');
     saveBtn.disabled = true;
+    if (insertImageBtn) {
+        insertImageBtn.classList.remove('hidden');
+        insertImageBtn.disabled = true;
+    }
 
     [titleEl, excerptEl].forEach(el => {
         if (!el) {
@@ -1233,14 +1259,20 @@ function enterAdminEditMode(context) {
     }).then(editor => {
         inlineEditorInstance = editor;
         saveBtn.disabled = false;
+        if (insertImageBtn) {
+            insertImageBtn.disabled = false;
+        }
     }).catch(error => {
         console.error('Não foi possível iniciar o editor inline:', error);
         saveBtn.disabled = false;
+        if (insertImageBtn) {
+            insertImageBtn.disabled = false;
+        }
     });
 }
 
 function exitAdminEditMode(context) {
-    const { controls, toggleBtn, saveBtn, cancelBtn, titleEl, excerptEl, contentEl, revert = false, updatedData = null } = context;
+    const { controls, toggleBtn, saveBtn, cancelBtn, insertImageBtn, titleEl, excerptEl, contentEl, revert = false, updatedData = null } = context;
 
     const finalize = () => {
         adminEditing = false;
@@ -1249,6 +1281,10 @@ function exitAdminEditMode(context) {
         saveBtn.classList.add('hidden');
         cancelBtn.classList.add('hidden');
         saveBtn.disabled = false;
+        if (insertImageBtn) {
+            insertImageBtn.classList.add('hidden');
+            insertImageBtn.disabled = true;
+        }
         if (adminButtonDefaults.save) {
             saveBtn.innerHTML = adminButtonDefaults.save;
         }
@@ -1299,11 +1335,14 @@ async function saveAdminInlineChanges(context) {
         return;
     }
 
-    const { controls, toggleBtn, saveBtn, cancelBtn, titleEl, excerptEl, contentEl } = context;
+    const { controls, toggleBtn, saveBtn, cancelBtn, insertImageBtn, titleEl, excerptEl, contentEl } = context;
 
     const defaultSaveLabel = adminButtonDefaults.save || saveBtn.innerHTML;
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+    if (insertImageBtn) {
+        insertImageBtn.disabled = true;
+    }
 
     const title = titleEl.textContent.trim();
     const excerptText = excerptEl ? excerptEl.textContent.trim() : '';
@@ -1354,6 +1393,7 @@ async function saveAdminInlineChanges(context) {
             toggleBtn,
             saveBtn,
             cancelBtn,
+            insertImageBtn,
             titleEl,
             excerptEl,
             contentEl,
@@ -1366,6 +1406,36 @@ async function saveAdminInlineChanges(context) {
         showToast(message);
         saveBtn.disabled = false;
         saveBtn.innerHTML = defaultSaveLabel;
+        if (insertImageBtn) {
+            insertImageBtn.disabled = false;
+        }
+    }
+}
+
+function promptImageInsert(editor) {
+    if (!editor) {
+        return;
+    }
+
+    const url = prompt('Informe a URL da imagem (https://...)');
+    if (!url) {
+        return;
+    }
+
+    const trimmed = url.trim();
+    if (!/^https?:\/\//i.test(trimmed)) {
+        showToast('Use um link completo começando com http:// ou https://');
+        return;
+    }
+
+    try {
+        editor.model.change(() => {
+            editor.execute('insertImage', { source: [{ src: trimmed }] });
+        });
+        showToast('Imagem adicionada ao conteúdo! 🖼️');
+    } catch (error) {
+        console.error('Não foi possível inserir a imagem:', error);
+        showToast('Não foi possível inserir a imagem. Tente novamente.');
     }
 }
 

@@ -54,6 +54,10 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                             <p class="mt-1 text-sm text-gray-500">Quebre o texto com linhas em branco para criar parágrafos automaticamente. Tags HTML avançadas continuam funcionando.</p>
+                            <button type="button" id="insert-image-url-edit" class="mt-3 inline-flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium text-sm px-3 py-2 rounded-md transition-colors">
+                                <i class="fas fa-image"></i>
+                                Inserir imagem por URL
+                            </button>
                         </div>
                     </div>
 
@@ -263,6 +267,12 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(editor => {
                 window.adminBlogEditor = editor;
+                const insertButton = document.getElementById('insert-image-url-edit');
+                if (insertButton) {
+                    insertButton.addEventListener('click', function() {
+                        insertImageFromUrl(editor);
+                    });
+                }
             })
             .catch(error => {
                 console.error('Não foi possível inicializar o CKEditor:', error);
@@ -271,6 +281,35 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('CKEditor não pôde ser carregado. Verifique a conexão com o CDN.');
     }
 });
+
+function insertImageFromUrl(editor) {
+    if (!editor) {
+        return;
+    }
+
+    const url = prompt('Informe a URL da imagem (https://...)');
+    if (!url) {
+        return;
+    }
+
+    const trimmed = url.trim();
+    if (!/^https?:\/\//i.test(trimmed)) {
+        alert('Use um link completo começando com http:// ou https://');
+        return;
+    }
+
+    editor.model.change(() => {
+        editor.execute('insertImage', { source: [{ src: trimmed }] });
+    });
+}
 </script>
+@endpush
+
+@push('styles')
+<style>
+    #insert-image-url-edit i {
+        font-size: 0.875rem;
+    }
+</style>
 @endpush
 @endsection
