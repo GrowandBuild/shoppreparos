@@ -1,0 +1,13 @@
+# Manter apenas arquivos sensíveis e temporários fora do versionamento
+.env
+.env.*
+
+# Diretório externo que não faz parte do projeto
+C_/
+
+# Arquivos temporários comuns
+*.tmp
+*.temp
+.phpunit.result.cache
+coverage/
+node_modules
