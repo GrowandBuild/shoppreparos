@@ -41,6 +41,39 @@ class ProdutoController extends Controller
         return $v;
     }
 
+    private function copyToPublicStorage(string $relativePath): void
+    {
+        if (is_link(public_path('storage'))) {
+            return;
+        }
+
+        $source = storage_path('app/public/' . $relativePath);
+        $target = public_path('storage/' . $relativePath);
+
+        if (!file_exists($source)) {
+            return;
+        }
+
+        $targetDir = dirname($target);
+        if (!file_exists($targetDir)) {
+            mkdir($targetDir, 0755, true);
+        }
+
+        @copy($source, $target);
+    }
+
+    private function deletePublicCopy(string $relativePath): void
+    {
+        if (is_link(public_path('storage'))) {
+            return;
+        }
+
+        $target = public_path('storage/' . $relativePath);
+        if (file_exists($target)) {
+            @unlink($target);
+        }
+    }
+
     private function uploadImagem(Request $request, array &$data, ?Produto $produto = null): void
     {
         if (!$request->hasFile('imagem')) return;
@@ -54,11 +87,17 @@ class ProdutoController extends Controller
                 if (Storage::disk('public')->exists($oldPath)) {
                     Storage::disk('public')->delete($oldPath);
                 }
+                $this->deletePublicCopy($oldPath);
             }
 
             $filename = uniqid('produto_') . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('produtos', $filename, 'public');
-            $data['imagem'] = $this->normalizeFilename($filename);
+            if (!Storage::disk('public')->exists('produtos')) {
+                Storage::disk('public')->makeDirectory('produtos');
+            }
+
+            $storedPath = $file->storeAs('produtos', $filename, 'public');
+            $this->copyToPublicStorage($storedPath);
+            $data['imagem'] = $this->normalizeFilename($storedPath);
         } catch (\Throwable $e) {
             Log::error('Erro upload imagem produto: ' . $e->getMessage());
         }
@@ -143,6 +182,7 @@ class ProdutoController extends Controller
                     $ext = pathinfo($origPath, PATHINFO_EXTENSION);
                     $newFilename = 'produto_' . time() . '_' . Str::random(8) . '.' . $ext;
                     Storage::disk('public')->copy($origPath, 'produtos/' . $newFilename);
+                    $this->copyToPublicStorage('produtos/' . $newFilename);
                     $produtoDuplicado->imagem = $newFilename;
                 } catch (\Throwable $e) {
                     Log::warning('Falha ao copiar imagem na duplicação: ' . $e->getMessage());
@@ -162,6 +202,7 @@ class ProdutoController extends Controller
             if (Storage::disk('public')->exists($path)) {
                 Storage::disk('public')->delete($path);
             }
+            $this->deletePublicCopy($path);
         }
         $produto->delete();
         return redirect()->route('admin.produtos.index')->with('success', 'Produto removido!');
