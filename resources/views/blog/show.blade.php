@@ -1109,25 +1109,29 @@ function removeGeneratedTableOfContents(target) {
         return;
     }
 
-    let existing = target.querySelector('[data-generated-toc="true"]');
+    const candidates = new Set(Array.from(target.querySelectorAll('[data-generated-toc="true"]')));
 
-    if (!existing) {
-        existing = Array.from(target.children).find(child => {
-            if (!child || child.nodeType !== 1) {
-                return false;
-            }
+    Array.from(target.querySelectorAll('div')).forEach(element => {
+        if (candidates.has(element)) {
+            return;
+        }
 
-            const element = child;
-            const hasVisualClasses = element.classList && element.classList.contains('border-l-4') && element.classList.contains('p-6');
-            const mentionsIndex = (element.textContent || '').includes('Índice do Artigo');
+        if (!element.classList) {
+            return;
+        }
 
-            return hasVisualClasses && mentionsIndex;
-        });
-    }
+        const mentionsIndex = (element.textContent || '').includes('Índice do Artigo');
+        const hasVisualClasses = element.classList.contains('border-l-4') && element.classList.contains('p-6');
+        const hasHeadingNode = element.querySelector('h3') && element.querySelector('h3').textContent.includes('Índice do Artigo');
 
-    if (existing) {
-        existing.remove();
-    }
+        if (mentionsIndex && (hasVisualClasses || hasHeadingNode)) {
+            candidates.add(element);
+        }
+    });
+
+    candidates.forEach(element => {
+        element.remove();
+    });
 }
 
 function generateTableOfContents(contentEl) {
