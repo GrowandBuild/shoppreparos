@@ -135,7 +135,7 @@
 </div>
 
 @push('scripts')
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/41.2.1/classic/ckeditor.js"></script>
 @endpush
 
 @push('scripts')
@@ -209,38 +209,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    if (typeof tinymce !== 'undefined') {
-        tinymce.init({
-            selector: '#content',
-            language: 'pt_BR',
-            plugins: 'lists advlist table link code autoresize paste quickbars',
-            toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table link | removeformat | code',
-            menubar: 'insert format table view tools',
-            branding: false,
-            contextmenu: 'copy paste | inserttable cell row column deletetable',
-            quickbars_selection_toolbar: 'bold italic underline | bullist numlist | blockquote',
-            paste_as_text: false,
-            paste_data_images: true,
-            convert_urls: false,
-            height: 500,
-            content_style: 'body { font-family: "Inter", system-ui, sans-serif; font-size: 16px; line-height: 1.7; }',
-            block_formats: 'Parágrafo=p; Cabeçalho 2=h2; Cabeçalho 3=h3; Cabeçalho 4=h4; Preformatado=pre',
-            table_default_styles: {
-                width: '100%',
-                borderCollapse: 'collapse'
-            }
-        });
+    if (typeof ClassicEditor !== 'undefined') {
+        ClassicEditor
+            .create(document.querySelector('#content'), {
+                language: 'pt-br',
+                toolbar: {
+                    items: [
+                        'undo', 'redo', '|',
+                        'heading', '|',
+                        'bold', 'italic', 'underline', 'link', '|',
+                        'bulletedList', 'numberedList', 'outdent', 'indent', '|',
+                        'blockQuote', 'insertTable', 'codeBlock'
+                    ]
+                },
+                heading: {
+                    options: [
+                        { model: 'paragraph', title: 'Parágrafo', class: 'ck-heading_paragraph' },
+                        { model: 'heading2', view: 'h2', title: 'Cabeçalho 2', class: 'ck-heading_heading2' },
+                        { model: 'heading3', view: 'h3', title: 'Cabeçalho 3', class: 'ck-heading_heading3' },
+                        { model: 'heading4', view: 'h4', title: 'Cabeçalho 4', class: 'ck-heading_heading4' }
+                    ]
+                },
+                table: {
+                    contentToolbar: [ 'tableColumn', 'tableRow', 'mergeTableCells', 'toggleTableCaption' ],
+                    defaultHeadings: { rows: 1, columns: 0 }
+                }
+            })
+            .then(editor => {
+                window.adminBlogEditor = editor;
+            })
+            .catch(error => {
+                console.error('Não foi possível inicializar o CKEditor:', error);
+            });
     } else {
-        console.error('TinyMCE não pôde ser carregado. Verifique a conexão com o CDN.');
-    }
-
-    const form = document.querySelector('form');
-    if (form) {
-        form.addEventListener('submit', function() {
-            if (typeof tinymce !== 'undefined') {
-                tinymce.triggerSave();
-            }
-        });
+        console.error('CKEditor não pôde ser carregado. Verifique a conexão com o CDN.');
     }
 });
 </script>
