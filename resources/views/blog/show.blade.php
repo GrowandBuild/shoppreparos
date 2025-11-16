@@ -1109,27 +1109,15 @@ function removeGeneratedTableOfContents(target) {
         return;
     }
 
-    const candidates = new Set(Array.from(target.querySelectorAll('[data-generated-toc="true"]')));
+    const indexRegex = /índice do artigo/i;
 
-    Array.from(target.querySelectorAll('div')).forEach(element => {
-        if (candidates.has(element)) {
-            return;
-        }
+    // Remove leading elements that contain an index block saved no conteúdo original
+    while (target.firstElementChild && indexRegex.test(target.firstElementChild.textContent || '')) {
+        target.removeChild(target.firstElementChild);
+    }
 
-        if (!element.classList) {
-            return;
-        }
-
-        const mentionsIndex = (element.textContent || '').includes('Índice do Artigo');
-        const hasVisualClasses = element.classList.contains('border-l-4') && element.classList.contains('p-6');
-        const hasHeadingNode = element.querySelector('h3') && element.querySelector('h3').textContent.includes('Índice do Artigo');
-
-        if (mentionsIndex && (hasVisualClasses || hasHeadingNode)) {
-            candidates.add(element);
-        }
-    });
-
-    candidates.forEach(element => {
+    // Remove any previously generated TOC blocks scattered no conteúdo
+    target.querySelectorAll('[data-generated-toc="true"]').forEach(element => {
         element.remove();
     });
 }
