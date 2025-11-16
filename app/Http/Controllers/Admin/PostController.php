@@ -83,8 +83,10 @@ class PostController extends Controller
             'published' => 'boolean'
         ]);
 
-    // Capturar apenas os campos esperados (evita lixo do $request->all())
-    $data = $request->only(['title','excerpt','content','category']);
+        // Capturar apenas os campos esperados (evita lixo do $request->all())
+        $data = $request->only(['title','excerpt','content','category']);
+
+        $data['content'] = $this->normalizeContent($data['content']);
         
         // Processar slug
         $data['slug'] = Str::slug($data['title']);
@@ -190,8 +192,10 @@ class PostController extends Controller
             'published' => 'boolean'
         ]);
 
-    // Capturar apenas os campos previstos
-    $data = $request->only(['title','excerpt','content','category']);
+        // Capturar apenas os campos previstos
+        $data = $request->only(['title','excerpt','content','category']);
+
+        $data['content'] = $this->normalizeContent($data['content']);
 
         // Atualizar slug se título mudou
         if ($data['title'] !== $post->title) {
@@ -346,5 +350,39 @@ class PostController extends Controller
         if (file_exists($target)) {
             @unlink($target);
         }
+    }
+
+    private function normalizeContent(string $content): string
+    {
+        $trimmed = trim($content);
+
+        if ($trimmed === '') {
+            return '';
+        }
+
+        // Se já conter tags HTML, manter como está
+        if (preg_match('/<\s*\/?\s*[a-zA-Z!]/', $trimmed)) {
+            return $trimmed;
+        }
+
+        $normalized = preg_replace("/\r\n|\r/", "\n", $trimmed);
+        $blocks = preg_split("/\n{2,}/", $normalized);
+
+        $paragraphs = array_map(function ($block) {
+            $block = trim($block);
+            if ($block === '') {
+                return null;
+            }
+
+            $lines = array_map(function ($line) {
+                return htmlspecialchars($line, ENT_QUOTES, 'UTF-8');
+            }, explode("\n", $block));
+
+            return '<p>' . implode('<br>', $lines) . '</p>';
+        }, $blocks);
+
+        $paragraphs = array_filter($paragraphs);
+
+        return implode("\n\n", $paragraphs);
     }
 }

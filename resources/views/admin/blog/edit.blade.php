@@ -49,11 +49,11 @@
                             <label for="content" class="block text-sm font-medium text-gray-700 mb-2">Conteúdo do Post *</label>
                             <textarea name="content" id="content" rows="15" required
                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 @error('content') border-red-500 @enderror"
-                                      placeholder="Escreva o conteúdo completo do post em HTML...">{{ old('content', $post->content) }}</textarea>
+                                      placeholder="Escreva o conteúdo completo do post...">{!! old('content', $post->content) !!}</textarea>
                             @error('content')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
-                            <p class="mt-1 text-sm text-gray-500">Use HTML para formatação. Exemplo: &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;, etc.</p>
+                            <p class="mt-1 text-sm text-gray-500">Quebre o texto com linhas em branco para criar parágrafos automaticamente. Tags HTML avançadas continuam funcionando.</p>
                         </div>
                     </div>
 
