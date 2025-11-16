@@ -4,17 +4,33 @@
 
 @section('content')
 <div class="px-4 sm:px-6 lg:px-10 py-10 bg-slate-950/5">
+    @php($latestUpdate = $banners->max('updated_at'))
     <div class="max-w-7xl mx-auto space-y-10">
-        <section class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 via-sky-500 to-cyan-400 text-white p-10 shadow-2xl">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.25)_0,rgba(255,255,255,0)_55%)]"></div>
-            <div class="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-                <div class="max-w-2xl space-y-4">
-                    <p class="text-sm uppercase tracking-[0.35em] text-white/80">Central de Criativos</p>
-                    <h1 class="text-4xl lg:text-5xl font-black leading-tight">Gerencie banners com visual de campanha premium</h1>
-                    <p class="text-lg lg:text-xl text-white/80">Organize artes desktop e mobile, mantenha a ordem do carrossel e publique novidades com pré-visualização instantânea.</p>
+        <section class="relative overflow-hidden rounded-[32px] bg-slate-900 text-white shadow-[0_30px_80px_-40px_rgba(15,23,42,0.8)]">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.2)_0,rgba(15,23,42,0.6)_65%,rgba(15,23,42,0.95)_100%)]"></div>
+            <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl"></div>
+            <div class="absolute -left-32 bottom-0 h-80 w-80 rounded-full bg-indigo-500/20 blur-3xl"></div>
+            <div class="relative z-10 grid gap-10 p-10 lg:grid-cols-[minmax(0,3fr)_minmax(260px,2fr)] lg:items-center">
+                <div class="space-y-6">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.32em] text-cyan-100">
+                        <i class="fas fa-bolt"></i>
+                        Central de Criativos
+                    </span>
+                    <h1 class="text-4xl font-black leading-tight sm:text-5xl">Gerencie banners com visual de campanha premium</h1>
+                    <p class="text-base text-white/80 sm:text-lg">Organize artes desktop e mobile, mantenha a ordem do carrossel e publique novidades com pré-visualização instantânea. Um ambiente único para coordenar suas campanhas com segurança.</p>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="flex items-start gap-3 text-sm text-white/80">
+                            <span class="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/15 text-white"><i class="fas fa-layer-group text-xs"></i></span>
+                            <span>Fluxo guiado para upload das versões desktop e mobile com feedback imediato.</span>
+                        </div>
+                        <div class="flex items-start gap-3 text-sm text-white/80">
+                            <span class="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/15 text-white"><i class="fas fa-shield-alt text-xs"></i></span>
+                            <span>Histórico preservado para restaurar campanhas anteriores sem complicação.</span>
+                        </div>
+                    </div>
                     <div class="flex flex-wrap gap-3">
                         <a href="{{ route('admin.banners.gallery') }}" class="inline-flex items-center gap-2 rounded-full bg-white/15 px-5 py-2 text-sm font-semibold backdrop-blur transition hover:bg-white/25">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             Galeria de histórico
                         </a>
                         <a href="#novo-banner" class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-slate-900 shadow transition hover:shadow-lg">
@@ -23,15 +39,32 @@
                         </a>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4 text-left lg:text-right">
-                    <div class="rounded-2xl bg-white/15 px-5 py-4 backdrop-blur">
-                        <p class="text-xs uppercase tracking-widest text-white/60">Banners ativos</p>
-                        <p class="mt-2 text-3xl font-bold">{{ $banners->where('is_active', true)->count() }}</p>
+                <div class="grid gap-4">
+                    <div class="rounded-3xl border border-white/10 bg-white/10 p-6 backdrop-blur">
+                        <div class="flex items-center justify-between text-white/80">
+                            <span class="text-xs uppercase tracking-widest">Banners ativos</span>
+                            <i class="fas fa-signal"></i>
+                        </div>
+                        <p class="mt-3 text-4xl font-bold text-white">{{ $banners->where('is_active', true)->count() }}</p>
+                        <p class="mt-1 text-xs uppercase tracking-widest text-white/60">Operando no carrossel</p>
                     </div>
-                    <div class="rounded-2xl bg-white/15 px-5 py-4 backdrop-blur">
-                        <p class="text-xs uppercase tracking-widest text-white/60">Total cadastrados</p>
-                        <p class="mt-2 text-3xl font-bold">{{ $banners->count() }}</p>
+                    <div class="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+                        <div class="flex items-center justify-between text-white/80">
+                            <span class="text-xs uppercase tracking-widest">Total cadastrados</span>
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <p class="mt-3 text-4xl font-bold text-white">{{ $banners->count() }}</p>
+                        <p class="mt-1 text-xs uppercase tracking-widest text-white/60">Arte pronta para uso</p>
                     </div>
+                    @if($latestUpdate)
+                        <div class="flex items-center justify-between rounded-3xl border border-white/10 bg-white/5 px-6 py-4 text-xs font-medium text-white/70 backdrop-blur">
+                            <span class="inline-flex items-center gap-2 uppercase tracking-widest">
+                                <i class="fas fa-clock"></i>
+                                Última atualização
+                            </span>
+                            <span>{{ \Illuminate\Support\Carbon::parse($latestUpdate)->format('d/m/Y H:i') }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </section>
@@ -146,14 +179,48 @@
         </section>
 
         <section class="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
-            <header class="flex flex-col gap-4 border-b border-slate-100 pb-6 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-900">Banners em produção</h2>
-                    <p class="text-sm text-slate-500">Arrumamos as informações para facilitar os ajustes rápidos.</p>
+            <header class="flex flex-col gap-6 border-b border-slate-100 pb-6">
+                <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div class="space-y-3">
+                        <span class="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.32em] text-indigo-700">
+                            <i class="fas fa-wave-square text-indigo-600"></i>
+                            Monitoramento
+                        </span>
+                        <h2 class="text-3xl font-bold text-slate-900">Banners em produção</h2>
+                        <p class="text-sm text-slate-500">Arrumamos as informações para facilitar ajustes rápidos e garantir coerência visual nas campanhas.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600"><i class="fas fa-play"></i></span>
+                            <div>
+                                <p class="text-xs uppercase tracking-widest text-slate-400">Ativos</p>
+                                <p class="text-lg">{{ $banners->where('is_active', true)->count() }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700">
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-900/10 text-slate-900"><i class="fas fa-layer-group"></i></span>
+                            <div>
+                                <p class="text-xs uppercase tracking-widest text-slate-400">Total</p>
+                                <p class="text-lg">{{ $banners->count() }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
-                    <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500"></span> Ativo
-                    <span class="inline-flex h-2 w-2 rounded-full bg-amber-500"></span> Rascunho
+                <div class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-emerald-600">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                        Ativo
+                    </span>
+                    <span class="inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-3 py-1 text-amber-600">
+                        <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                        Rascunho
+                    </span>
+                    @if($latestUpdate)
+                        <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-slate-500">
+                            <i class="fas fa-history"></i>
+                            Atualizado em {{ \Illuminate\Support\Carbon::parse($latestUpdate)->format('d/m/Y H:i') }}
+                        </span>
+                    @endif
                 </div>
             </header>
 
@@ -161,9 +228,10 @@
                 <div class="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                     @foreach($banners as $banner)
                         @php($isActive = (bool) ($banner->is_active ?? true))
-                        <article class="group relative flex flex-col rounded-3xl border border-slate-100 bg-slate-50/80 shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
-                            <div class="rounded-t-3xl bg-slate-900/80 px-6 py-5 text-white">
-                                <div class="flex items-start justify-between gap-3">
+                        <article class="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl">
+                            <div class="relative px-6 py-5 text-white">
+                                <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-indigo-700 to-slate-900 opacity-95 transition group-hover:opacity-100"></div>
+                                <div class="relative flex items-start justify-between gap-3">
                                     <div>
                                         <h3 class="text-lg font-semibold leading-tight">{{ $banner->titulo ?? 'Banner #' . $banner->id }}</h3>
                                         <p class="text-xs uppercase tracking-widest text-white/60">Ordem {{ $banner->ordem ?? '—' }}</p>
