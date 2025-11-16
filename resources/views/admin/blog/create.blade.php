@@ -235,7 +235,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     defaultHeadings: { rows: 1, columns: 0 }
                 },
                 image: {
-                    toolbar: ['imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|', 'toggleImageCaption', 'imageTextAlternative']
+                    toolbar: ['imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|', 'toggleImageCaption', 'imageTextAlternative'],
+                    insert: {
+                        integrations: ['insertImageViaUrl']
+                    }
                 }
             })
             .then(editor => {
