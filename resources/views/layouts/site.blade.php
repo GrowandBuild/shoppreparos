@@ -40,8 +40,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Assets Compilados -->
-    <link href="/build/assets/app-BwpZlWD3.css" rel="stylesheet">
-    <script src="/build/assets/app-DaBYqt0m.js" defer></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <!-- CSS Responsivo Global -->
     <link href="{{ asset('css/responsive.css') }}" rel="stylesheet">
