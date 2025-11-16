@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
@@ -317,6 +318,71 @@ class PostController extends Controller
         return redirect()
             ->back()
             ->with('success', "Post {$status} com sucesso!");
+    }
+
+    public function inlineUpdate(Request $request, Post $post)
+    {
+        $this->checkAdmin();
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'excerpt' => 'nullable|string|max:500',
+            'content' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $data = $validator->validated();
+        $updates = [];
+
+        if (isset($data['title']) && $data['title'] !== $post->title) {
+            $updates['title'] = $data['title'];
+            $updates['meta_title'] = $data['title'] . ' | Shopp Reparos';
+        }
+
+        $metaDescriptionSource = null;
+
+        if (array_key_exists('excerpt', $data)) {
+            $excerptValue = isset($data['excerpt']) ? trim($data['excerpt']) : '';
+            $updates['excerpt'] = $excerptValue !== '' ? $excerptValue : null;
+            $metaDescriptionSource = $excerptValue !== '' ? $excerptValue : null;
+        }
+
+        if (isset($data['content'])) {
+            $normalizedContent = $this->normalizeContent($data['content']);
+            $updates['content'] = $normalizedContent;
+            if ($metaDescriptionSource === null) {
+                $metaDescriptionSource = $normalizedContent;
+            }
+        }
+
+        if ($metaDescriptionSource !== null) {
+            $updates['meta_description'] = Str::limit(strip_tags($metaDescriptionSource), 160);
+        }
+
+        if (!empty($updates)) {
+            $post->update($updates);
+        }
+
+        $post->refresh();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Post atualizado com sucesso!',
+            'post' => [
+                'title' => $post->title,
+                'excerpt' => $post->excerpt,
+                'content' => $post->content,
+                'updated_at' => $post->updated_at->toDateTimeString(),
+                'reading_time_text' => $post->reading_time_text,
+                'reading_time' => $post->reading_time
+            ]
+        ]);
     }
 
     private function copyToPublicStorage(string $relativePath): void

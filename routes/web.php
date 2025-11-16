@@ -84,7 +84,8 @@ Route::middleware('auth')->group(function () {
     // Rotas administrativas com prefixo /admin
     Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         // Blog
-        Route::resource('posts', App\Http\Controllers\Admin\PostController::class);
+    Route::resource('posts', App\Http\Controllers\Admin\PostController::class);
+    Route::patch('posts/{post}/inline', [App\Http\Controllers\Admin\PostController::class, 'inlineUpdate'])->name('posts.inline-update');
         Route::patch('posts/{post}/toggle-published', [App\Http\Controllers\Admin\PostController::class, 'togglePublished'])->name('posts.toggle-published');
         
         // Produtos

@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         'heading', '|',
                         'bold', 'italic', 'underline', 'link', '|',
                         'bulletedList', 'numberedList', 'outdent', 'indent', '|',
-                        'blockQuote', 'insertTable', 'codeBlock'
+                        'blockQuote', 'insertTable', 'insertImage'
                     ]
                 },
                 heading: {
@@ -233,6 +233,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 table: {
                     contentToolbar: [ 'tableColumn', 'tableRow', 'mergeTableCells', 'toggleTableCaption' ],
                     defaultHeadings: { rows: 1, columns: 0 }
+                },
+                image: {
+                    toolbar: ['imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|', 'toggleImageCaption', 'imageTextAlternative']
                 }
             })
             .then(editor => {

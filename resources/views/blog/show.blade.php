@@ -41,6 +41,10 @@
 </script>
 @endpush
 
+@php
+    $isAdmin = auth()->check() && auth()->user()->perfil === 'admin';
+@endphp
+
 @push('styles')
 <style>
 /* Reading Progress */
@@ -554,6 +558,95 @@
         display: none;
     }
 }
+
+@if($isAdmin)
+.admin-editable-highlight {
+    outline: 2px dashed rgba(59, 130, 246, 0.6);
+    outline-offset: 6px;
+    border-radius: 12px;
+    transition: outline-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-editable-highlight:focus {
+    outline-color: rgba(79, 70, 229, 0.8);
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.1);
+}
+
+.admin-editing-active #article-content {
+    cursor: text;
+}
+
+.admin-inline-controls {
+    position: fixed;
+    bottom: 2.5rem;
+    right: 2.5rem;
+    z-index: 1200;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.85);
+    padding: 0.75rem 1rem;
+    border-radius: 9999px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+}
+
+.admin-inline-controls button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.admin-inline-controls button.admin-primary {
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+}
+
+.admin-inline-controls button.admin-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(79, 70, 229, 0.35);
+}
+
+.admin-inline-controls button.admin-success {
+    background: linear-gradient(135deg, #22c55e, #14b8a6);
+}
+
+.admin-inline-controls button.admin-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(34, 197, 94, 0.35);
+}
+
+.admin-inline-controls button.admin-muted {
+    background: rgba(148, 163, 184, 0.35);
+}
+
+.admin-inline-controls button.admin-muted:hover {
+    background: rgba(148, 163, 184, 0.55);
+}
+
+.admin-inline-controls button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+@media (max-width: 768px) {
+    .admin-inline-controls {
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+@endif
 </style>
 @endpush
 
@@ -612,13 +705,13 @@
             </div>
             
             <!-- Title -->
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-display font-black mb-6 leading-tight">
+            <h1 id="post-title" class="text-4xl md:text-5xl lg:text-6xl font-display font-black mb-6 leading-tight">
                 {{ $post->title }}
             </h1>
             
             <!-- Excerpt -->
-            @if($post->excerpt)
-            <p class="text-xl md:text-2xl opacity-90 max-w-4xl mx-auto mb-8 leading-relaxed">
+            @if($post->excerpt || $isAdmin)
+            <p id="post-excerpt" class="text-xl md:text-2xl opacity-90 max-w-4xl mx-auto mb-8 leading-relaxed" @if(!$post->excerpt) style="display:none;" @endif>
                 {{ $post->excerpt }}
             </p>
             @endif
@@ -635,7 +728,7 @@
                 </div>
                 <div class="flex items-center bg-white bg-opacity-20 backdrop-blur-sm rounded-full px-4 py-2">
                     <i class="fas fa-clock mr-2"></i>
-                    <span>{{ $post->reading_time_text }}</span>
+                    <span id="reading-time-badge">{{ $post->reading_time_text }}</span>
                 </div>
                 <div class="flex items-center bg-white bg-opacity-20 backdrop-blur-sm rounded-full px-4 py-2">
                     <i class="fas fa-eye mr-2"></i>
@@ -670,7 +763,7 @@
                 <h3 class="font-semibold text-lg text-gray-800">{{ $post->author_name }}</h3>
                 <p class="text-gray-600">Especialista em Reparos • Shopp Reparos</p>
                 <p class="text-sm text-gray-500">
-                    Publicado em {{ $post->formatted_published_at }} • Atualizado em {{ $post->updated_at->format('d/m/Y') }}
+                    Publicado em {{ $post->formatted_published_at }} • Atualizado em <span id="post-updated-at">{{ $post->updated_at->format('d/m/Y') }}</span>
                 </p>
             </div>
         </div>
@@ -683,11 +776,11 @@
                     <div class="text-xs text-gray-600">👁️ Views</div>
                 </div>
                 <div>
-                    <div class="text-lg font-bold text-primary-600">{{ $post->reading_time }}</div>
+                    <div id="reading-time-meta-value" class="text-lg font-bold text-primary-600">{{ $post->reading_time }}</div>
                     <div class="text-xs text-gray-600">🕰️ Min</div>
                 </div>
                 <div>
-                    <div class="text-lg font-bold text-primary-600">{{ str_word_count(strip_tags($post->content)) }}</div>
+                    <div id="word-count-meta-value" class="text-lg font-bold text-primary-600">{{ str_word_count(strip_tags($post->content)) }}</div>
                     <div class="text-xs text-gray-600">📝 Palavras</div>
                 </div>
                 <div>
@@ -915,10 +1008,38 @@
         @endif
     </div>
 </div>
+@if($isAdmin)
+<div id="admin-inline-controls" class="admin-inline-controls">
+    <button id="admin-edit-toggle" class="admin-primary">
+        <i class="fas fa-pen-to-square"></i>
+        Editar Página
+    </button>
+    <button id="admin-save-changes" class="admin-success hidden">
+        <i class="fas fa-save"></i>
+        Salvar
+    </button>
+    <button id="admin-cancel-edit" class="admin-muted hidden">
+        <i class="fas fa-xmark"></i>
+        Cancelar
+    </button>
+</div>
+@endif
 @endsection
+
+@if($isAdmin)
+@push('scripts')
+<script src="https://cdn.ckeditor.com/ckeditor5/41.2.1/classic/ckeditor.js"></script>
+@endpush
+@endif
 
 @push('scripts')
 <script>
+const isAdminViewing = @json($isAdmin);
+let inlineEditorInstance = null;
+let adminEditing = false;
+const adminOriginalState = {};
+const adminButtonDefaults = {};
+
 // Global functions
 function scrollToContent() {
     document.getElementById('article-content').scrollIntoView({
@@ -975,7 +1096,324 @@ function showToast(message) {
     }, 3000);
 }
 
+function setupAdminInlineEditing() {
+    if (!isAdminViewing) {
+        return;
+    }
+
+    const controls = document.getElementById('admin-inline-controls');
+    if (!controls) {
+        return;
+    }
+
+    const toggleBtn = document.getElementById('admin-edit-toggle');
+    const saveBtn = document.getElementById('admin-save-changes');
+    const cancelBtn = document.getElementById('admin-cancel-edit');
+    const titleEl = document.getElementById('post-title');
+    let excerptEl = document.getElementById('post-excerpt');
+    const contentEl = document.getElementById('article-content');
+
+    if (!toggleBtn || !saveBtn || !cancelBtn || !titleEl || !contentEl) {
+        console.warn('Inline editing não pôde ser inicializado - elementos obrigatórios ausentes.');
+        return;
+    }
+
+    adminButtonDefaults.save = saveBtn.innerHTML;
+
+    toggleBtn.addEventListener('click', function() {
+        if (adminEditing) {
+            return;
+        }
+
+        if (!excerptEl) {
+            excerptEl = document.createElement('p');
+            excerptEl.id = 'post-excerpt';
+            excerptEl.className = 'text-xl md:text-2xl opacity-90 max-w-4xl mx-auto mb-8 leading-relaxed';
+            excerptEl.style.display = 'none';
+            titleEl.insertAdjacentElement('afterend', excerptEl);
+        }
+
+        adminOriginalState.title = titleEl.innerHTML;
+        adminOriginalState.excerpt = excerptEl.innerHTML;
+        adminOriginalState.hadExcerpt = excerptEl.textContent.trim().length > 0;
+        adminOriginalState.content = contentEl.innerHTML;
+
+        enterAdminEditMode({
+            controls,
+            toggleBtn,
+            saveBtn,
+            cancelBtn,
+            titleEl,
+            excerptEl,
+            contentEl
+        });
+    });
+
+    cancelBtn.addEventListener('click', function() {
+        exitAdminEditMode({
+            controls,
+            toggleBtn,
+            saveBtn,
+            cancelBtn,
+            titleEl,
+            excerptEl,
+            contentEl,
+            revert: true
+        });
+    });
+
+    saveBtn.addEventListener('click', function() {
+        saveAdminInlineChanges({
+            controls,
+            toggleBtn,
+            saveBtn,
+            cancelBtn,
+            titleEl,
+            excerptEl,
+            contentEl
+        });
+    });
+}
+
+function enterAdminEditMode(context) {
+    const { controls, toggleBtn, saveBtn, cancelBtn, titleEl, excerptEl, contentEl } = context;
+
+    adminEditing = true;
+    document.body.classList.add('admin-editing-active');
+
+    toggleBtn.classList.add('hidden');
+    saveBtn.classList.remove('hidden');
+    cancelBtn.classList.remove('hidden');
+    saveBtn.disabled = true;
+
+    [titleEl, excerptEl].forEach(el => {
+        if (!el) {
+            return;
+        }
+        el.classList.add('admin-editable-highlight');
+        el.contentEditable = 'true';
+        el.style.display = '';
+    });
+
+    if (typeof ClassicEditor === 'undefined') {
+        console.error('CKEditor não carregado na página.');
+        saveBtn.disabled = false;
+        return;
+    }
+
+    ClassicEditor.create(contentEl, {
+        language: 'pt-br',
+        toolbar: {
+            items: [
+                'undo', 'redo', '|',
+                'heading', '|',
+                'bold', 'italic', 'underline', 'link', '|',
+                'bulletedList', 'numberedList', 'outdent', 'indent', '|',
+                'blockQuote', 'insertTable', 'insertImage'
+            ]
+        },
+        heading: {
+            options: [
+                { model: 'paragraph', title: 'Parágrafo', class: 'ck-heading_paragraph' },
+                { model: 'heading2', view: 'h2', title: 'Cabeçalho 2', class: 'ck-heading_heading2' },
+                { model: 'heading3', view: 'h3', title: 'Cabeçalho 3', class: 'ck-heading_heading3' },
+                { model: 'heading4', view: 'h4', title: 'Cabeçalho 4', class: 'ck-heading_heading4' }
+            ]
+        },
+        table: {
+            contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'toggleTableCaption'],
+            defaultHeadings: { rows: 1, columns: 0 }
+        },
+        image: {
+            toolbar: ['imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|', 'toggleImageCaption', 'imageTextAlternative']
+        }
+    }).then(editor => {
+        inlineEditorInstance = editor;
+        saveBtn.disabled = false;
+    }).catch(error => {
+        console.error('Não foi possível iniciar o editor inline:', error);
+        saveBtn.disabled = false;
+    });
+}
+
+function exitAdminEditMode(context) {
+    const { controls, toggleBtn, saveBtn, cancelBtn, titleEl, excerptEl, contentEl, revert = false, updatedData = null } = context;
+
+    const finalize = () => {
+        adminEditing = false;
+        document.body.classList.remove('admin-editing-active');
+        toggleBtn.classList.remove('hidden');
+        saveBtn.classList.add('hidden');
+        cancelBtn.classList.add('hidden');
+        saveBtn.disabled = false;
+        if (adminButtonDefaults.save) {
+            saveBtn.innerHTML = adminButtonDefaults.save;
+        }
+
+        [titleEl, excerptEl].forEach(el => {
+            if (!el) {
+                return;
+            }
+            el.contentEditable = 'false';
+            el.classList.remove('admin-editable-highlight');
+        });
+
+        if (revert) {
+            titleEl.innerHTML = adminOriginalState.title ?? titleEl.innerHTML;
+            if (excerptEl) {
+                excerptEl.innerHTML = adminOriginalState.excerpt ?? '';
+                excerptEl.style.display = adminOriginalState.hadExcerpt ? '' : 'none';
+            }
+            contentEl.innerHTML = adminOriginalState.content ?? contentEl.innerHTML;
+            updateInlineMeta(null, adminOriginalState.content);
+        } else if (updatedData) {
+            if (updatedData.title) {
+                titleEl.innerHTML = updatedData.title;
+            }
+            if (excerptEl) {
+                const newExcerpt = (updatedData.excerpt ?? '').trim();
+                excerptEl.innerHTML = newExcerpt;
+                excerptEl.style.display = newExcerpt.length ? '' : 'none';
+            }
+            if (updatedData.content) {
+                contentEl.innerHTML = updatedData.content;
+            }
+        }
+    };
+
+    if (inlineEditorInstance) {
+        const editor = inlineEditorInstance;
+        inlineEditorInstance = null;
+        editor.destroy().then(finalize).catch(finalize);
+    } else {
+        finalize();
+    }
+}
+
+async function saveAdminInlineChanges(context) {
+    if (!inlineEditorInstance) {
+        showToast('Editor ainda não está pronto.');
+        return;
+    }
+
+    const { controls, toggleBtn, saveBtn, cancelBtn, titleEl, excerptEl, contentEl } = context;
+
+    const defaultSaveLabel = adminButtonDefaults.save || saveBtn.innerHTML;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
+    const title = titleEl.textContent.trim();
+    const excerptText = excerptEl ? excerptEl.textContent.trim() : '';
+    const contentData = inlineEditorInstance.getData();
+
+    if (!title) {
+        showToast('O título não pode ficar vazio.');
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = defaultSaveLabel;
+        return;
+    }
+
+    const payload = {
+        title,
+        content: contentData,
+        excerpt: excerptText.length ? excerptText : null
+    };
+
+    try {
+        const response = await fetch('{{ route('admin.posts.inline-update', $post) }}', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            const message = data && data.errors ? Object.values(data.errors).flat().join(' ') : 'Não foi possível salvar as alterações.';
+            throw new Error(message);
+        }
+
+        adminOriginalState.title = data.post.title ?? titleEl.innerHTML;
+        adminOriginalState.excerpt = data.post.excerpt ?? '';
+        adminOriginalState.hadExcerpt = (data.post.excerpt ?? '').trim().length > 0;
+        adminOriginalState.content = data.post.content ?? contentData;
+
+        updateInlineMeta(data.post, data.post.content ?? contentData);
+
+        showToast(data.message || 'Post atualizado com sucesso! 🚀');
+
+        exitAdminEditMode({
+            controls,
+            toggleBtn,
+            saveBtn,
+            cancelBtn,
+            titleEl,
+            excerptEl,
+            contentEl,
+            revert: false,
+            updatedData: data.post
+        });
+    } catch (error) {
+        console.error('Erro ao salvar alterações inline:', error);
+        const message = error.message || 'Não foi possível salvar. Verifique os campos e tente novamente.';
+        showToast(message);
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = defaultSaveLabel;
+    }
+}
+
+function updateInlineMeta(postData, contentHtml) {
+    if (postData && typeof postData.reading_time !== 'undefined') {
+        const readingMeta = document.getElementById('reading-time-meta-value');
+        if (readingMeta) {
+            readingMeta.textContent = postData.reading_time;
+        }
+    }
+
+    if (postData && postData.reading_time_text) {
+        const badge = document.getElementById('reading-time-badge');
+        if (badge) {
+            badge.textContent = postData.reading_time_text;
+        }
+    }
+
+    if (postData && postData.updated_at) {
+        const updatedAt = document.getElementById('post-updated-at');
+        if (updatedAt) {
+            try {
+                const formatted = new Intl.DateTimeFormat('pt-BR').format(new Date(postData.updated_at));
+                updatedAt.textContent = formatted;
+            } catch (error) {
+                updatedAt.textContent = postData.updated_at;
+            }
+        }
+    }
+
+    const wordCountTarget = document.getElementById('word-count-meta-value');
+    const htmlSource = contentHtml || (postData ? postData.content : null);
+    if (wordCountTarget && htmlSource) {
+        wordCountTarget.textContent = computeWordCount(htmlSource);
+    }
+}
+
+function computeWordCount(html) {
+    if (!html) {
+        return 0;
+    }
+    const text = html.replace(/<[^>]*>/g, ' ');
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    return words.length;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    if (isAdminViewing) {
+        setupAdminInlineEditing();
+    }
+
     // Reading progress bar
     const progressBar = document.querySelector('.reading-progress');
     const scrollIndicator = document.querySelector('.scroll-indicator-progress');
