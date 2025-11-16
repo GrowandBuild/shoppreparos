@@ -1104,6 +1104,74 @@ function showToast(message) {
     }, 3000);
 }
 
+function removeGeneratedTableOfContents(target) {
+    if (!target) {
+        return;
+    }
+
+    let existing = target.querySelector('[data-generated-toc="true"]');
+
+    if (!existing) {
+        existing = Array.from(target.children).find(child => {
+            if (!child || child.nodeType !== 1) {
+                return false;
+            }
+
+            const element = child;
+            const hasVisualClasses = element.classList && element.classList.contains('border-l-4') && element.classList.contains('p-6');
+            const mentionsIndex = (element.textContent || '').includes('Índice do Artigo');
+
+            return hasVisualClasses && mentionsIndex;
+        });
+    }
+
+    if (existing) {
+        existing.remove();
+    }
+}
+
+function generateTableOfContents(contentEl) {
+    const target = contentEl || document.getElementById('article-content');
+    if (!target) {
+        return;
+    }
+
+    removeGeneratedTableOfContents(target);
+
+    const headings = Array.from(target.querySelectorAll('h2, h3'));
+    if (headings.length < 3) {
+        return;
+    }
+
+    const toc = document.createElement('div');
+    toc.setAttribute('data-generated-toc', 'true');
+    toc.className = 'bg-gray-50 border-l-4 border-primary-500 p-6 rounded-lg mb-8';
+    toc.innerHTML = '<h3 class="font-bold text-lg mb-4 text-gray-800">📜 Índice do Artigo</h3>';
+
+    const tocList = document.createElement('ul');
+    tocList.className = 'space-y-2';
+
+    headings.forEach((heading, index) => {
+        if (!heading.id) {
+            heading.id = `heading-${index}`;
+        }
+
+        const isH2 = heading.tagName === 'H2';
+        const item = document.createElement('li');
+        const link = document.createElement('a');
+
+        link.href = `#${heading.id}`;
+        link.className = `${isH2 ? 'font-medium' : 'font-normal ml-4 text-sm'} text-gray-700 hover:text-primary-600 transition-colors block py-1`;
+        link.textContent = heading.textContent;
+
+        item.appendChild(link);
+        tocList.appendChild(item);
+    });
+
+    toc.appendChild(tocList);
+    target.insertBefore(toc, target.firstChild);
+}
+
 function setupAdminInlineEditing() {
     if (!isAdminViewing) {
         return;
@@ -1212,6 +1280,8 @@ function enterAdminEditMode(context) {
         insertImageBtn.disabled = true;
     }
 
+    removeGeneratedTableOfContents(contentEl);
+
     [titleEl, excerptEl].forEach(el => {
         if (!el) {
             return;
@@ -1268,6 +1338,7 @@ function enterAdminEditMode(context) {
         if (insertImageBtn) {
             insertImageBtn.disabled = false;
         }
+        generateTableOfContents(contentEl);
     });
 }
 
@@ -1323,9 +1394,16 @@ function exitAdminEditMode(context) {
     if (inlineEditorInstance) {
         const editor = inlineEditorInstance;
         inlineEditorInstance = null;
-        editor.destroy().then(finalize).catch(finalize);
+        editor.destroy().then(() => {
+            finalize();
+            generateTableOfContents(contentEl);
+        }).catch(() => {
+            finalize();
+            generateTableOfContents(contentEl);
+        });
     } else {
         finalize();
+        generateTableOfContents(contentEl);
     }
 }
 
@@ -1536,33 +1614,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Table of contents generation
-    const headings = content.querySelectorAll('h2, h3');
-    if (headings.length > 2) {
-        const toc = document.createElement('div');
-        toc.className = 'bg-gray-50 border-l-4 border-primary-500 p-6 rounded-lg mb-8';
-        toc.innerHTML = '<h3 class="font-bold text-lg mb-4 text-gray-800">📜 Índice do Artigo</h3>';
-        
-        const tocList = document.createElement('ul');
-        tocList.className = 'space-y-2';
-        
-        headings.forEach((heading, index) => {
-            const id = `heading-${index}`;
-            heading.id = id;
-            
-            const li = document.createElement('li');
-            const level = heading.tagName === 'H2' ? 'font-medium' : 'font-normal ml-4 text-sm';
-            li.innerHTML = `
-                <a href="#${id}" class="${level} text-gray-700 hover:text-primary-600 transition-colors block py-1">
-                    ${heading.textContent}
-                </a>
-            `;
-            tocList.appendChild(li);
-        });
-        
-        toc.appendChild(tocList);
-        content.insertBefore(toc, content.firstChild);
-    }
+    generateTableOfContents(content);
     
     // Smooth scroll for anchors
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
