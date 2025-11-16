@@ -1,6 +1,7 @@
 # Manter apenas arquivos sensíveis e temporários fora do versionamento
 .env
 .env.*
+!.env.example
 
 # Diretório externo que não faz parte do projeto
 C_/
@@ -10,4 +11,3 @@ C_/
 *.temp
 .phpunit.result.cache
 coverage/
-node_modules
