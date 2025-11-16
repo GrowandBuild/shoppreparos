@@ -121,6 +121,7 @@ class PostController extends Controller
                 Storage::disk('public')->makeDirectory('blog');
                 $stored = $imageFile->storeAs('blog', $imageName, 'public');
                 if ($stored) {
+                    $this->copyToPublicStorage($stored);
                     $data['featured_image'] = 'blog/' . $imageName;
                 } else {
                     throw new \RuntimeException('Falha ao salvar imagem no disco public');
@@ -228,6 +229,7 @@ class PostController extends Controller
                     if (file_exists(public_path($post->featured_image))) @unlink(public_path($post->featured_image));
                 } elseif (str_starts_with($post->featured_image, 'blog/')) {
                     Storage::disk('public')->delete($post->featured_image);
+                    $this->deletePublicCopy($post->featured_image);
                 }
             }
             
@@ -238,6 +240,7 @@ class PostController extends Controller
                 Storage::disk('public')->makeDirectory('blog');
                 $stored = $imageFile->storeAs('blog', $imageName, 'public');
                 if ($stored) {
+                    $this->copyToPublicStorage($stored);
                     $data['featured_image'] = 'blog/' . $imageName;
                 } else {
                     throw new \RuntimeException('Falha ao salvar imagem no disco public');
@@ -283,8 +286,9 @@ class PostController extends Controller
                     unlink(public_path($post->featured_image));
                 }
             } else {
-                // Sistema novo - deletar de storage
+                // Sistema novo - deletar de storage e cópia pública
                 Storage::disk('public')->delete($post->featured_image);
+                $this->deletePublicCopy($post->featured_image);
             }
         }
 
@@ -309,5 +313,38 @@ class PostController extends Controller
         return redirect()
             ->back()
             ->with('success', "Post {$status} com sucesso!");
+    }
+
+    private function copyToPublicStorage(string $relativePath): void
+    {
+        if (is_link(public_path('storage'))) {
+            return;
+        }
+
+        $source = storage_path('app/public/' . ltrim($relativePath, '/'));
+        $target = public_path('storage/' . ltrim($relativePath, '/'));
+
+        if (!file_exists($source)) {
+            return;
+        }
+
+        $targetDir = dirname($target);
+        if (!file_exists($targetDir)) {
+            mkdir($targetDir, 0755, true);
+        }
+
+        @copy($source, $target);
+    }
+
+    private function deletePublicCopy(string $relativePath): void
+    {
+        if (is_link(public_path('storage'))) {
+            return;
+        }
+
+        $target = public_path('storage/' . ltrim($relativePath, '/'));
+        if (file_exists($target)) {
+            @unlink($target);
+        }
     }
 }
