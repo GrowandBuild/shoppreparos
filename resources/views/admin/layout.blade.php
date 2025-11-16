@@ -13,6 +13,8 @@
     
     <!-- CSS Responsivo para Admin -->
     <link href="{{ asset('css/admin-responsive.css') }}" rel="stylesheet">
+
+    @stack('styles')
     
     <!-- Custom Styles -->
     <style>
@@ -344,5 +346,7 @@
             console.log('Sidebar mobile:', mobileSidebar);
         });
     </script>
+
+    @stack('scripts')
 </body>
 </html>

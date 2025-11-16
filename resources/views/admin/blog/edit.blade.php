@@ -161,66 +161,108 @@
     </div>
 </div>
 
+@push('scripts')
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+@endpush
+
+@push('scripts')
 <script>
-// Contador de caracteres para excerpt
-document.getElementById('excerpt').addEventListener('input', function(e) {
-    const maxLength = 500;
-    const currentLength = e.target.value.length;
-    const remaining = maxLength - currentLength;
-    
-    let counter = document.getElementById('excerpt-counter');
-    if (!counter) {
-        counter = document.createElement('p');
-        counter.id = 'excerpt-counter';
-        counter.className = 'mt-1 text-sm text-gray-500';
-        e.target.parentNode.appendChild(counter);
-    }
-    
-    counter.textContent = `${remaining} caracteres restantes`;
-    if (remaining < 0) {
-        counter.className = 'mt-1 text-sm text-red-500';
-    } else {
-        counter.className = 'mt-1 text-sm text-gray-500';
-    }
-});
-
-// Trigger inicial para o contador
-document.getElementById('excerpt').dispatchEvent(new Event('input'));
-
-// Preview da imagem selecionada
-document.getElementById('featured_image').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            // Remover preview anterior se existir
-            const existingPreview = document.getElementById('image-preview');
-            if (existingPreview) {
-                existingPreview.remove();
+document.addEventListener('DOMContentLoaded', function() {
+    const excerptInput = document.getElementById('excerpt');
+    if (excerptInput) {
+        const updateExcerptCounter = function(e) {
+            const maxLength = 500;
+            const currentLength = e.target.value.length;
+            const remaining = maxLength - currentLength;
+            let counter = document.getElementById('excerpt-counter');
+            if (!counter) {
+                counter = document.createElement('p');
+                counter.id = 'excerpt-counter';
+                counter.className = 'mt-1 text-sm text-gray-500';
+                e.target.parentNode.appendChild(counter);
             }
-            
-            // Criar novo preview
-            const preview = document.createElement('div');
-            preview.id = 'image-preview';
-            preview.className = 'mt-3 p-3 border rounded-md bg-gray-50';
-            
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'w-full h-32 object-cover rounded-md';
-            img.alt = 'Preview da nova imagem';
-            
-            const label = document.createElement('p');
-            label.className = 'text-sm text-gray-600 mt-2';
-            label.textContent = `Nova imagem: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-            
-            preview.appendChild(img);
-            preview.appendChild(label);
-            
-            // Inserir após o input
-            e.target.parentNode.appendChild(preview);
+
+            counter.textContent = `${remaining} caracteres restantes`;
+            counter.className = remaining < 0
+                ? 'mt-1 text-sm text-red-500'
+                : 'mt-1 text-sm text-gray-500';
         };
-        reader.readAsDataURL(file);
+
+        excerptInput.addEventListener('input', updateExcerptCounter);
+        updateExcerptCounter({ target: excerptInput });
+    }
+
+    const featuredInput = document.getElementById('featured_image');
+    if (featuredInput) {
+        featuredInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const existingPreview = document.getElementById('image-preview');
+                if (existingPreview) {
+                    existingPreview.remove();
+                }
+
+                const preview = document.createElement('div');
+                preview.id = 'image-preview';
+                preview.className = 'mt-3 p-3 border rounded-md bg-gray-50';
+
+                const img = document.createElement('img');
+                img.src = event.target.result;
+                img.className = 'w-full h-32 object-cover rounded-md';
+                img.alt = 'Preview da nova imagem';
+
+                const label = document.createElement('p');
+                label.className = 'text-sm text-gray-600 mt-2';
+                label.textContent = `Nova imagem: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+
+                preview.appendChild(img);
+                preview.appendChild(label);
+                e.target.parentNode.appendChild(preview);
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+    if (typeof tinymce !== 'undefined') {
+        tinymce.init({
+            selector: '#content',
+            language: 'pt_BR',
+            plugins: 'lists advlist table link code autoresize paste quickbars',
+            toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table link | removeformat | code',
+            menubar: 'insert format table view tools',
+            branding: false,
+            contextmenu: 'copy paste | inserttable cell row column deletetable',
+            quickbars_selection_toolbar: 'bold italic underline | bullist numlist | blockquote',
+            paste_as_text: false,
+            paste_data_images: true,
+            convert_urls: false,
+            height: 500,
+            content_style: 'body { font-family: "Inter", system-ui, sans-serif; font-size: 16px; line-height: 1.7; }',
+            block_formats: 'Parágrafo=p; Cabeçalho 2=h2; Cabeçalho 3=h3; Cabeçalho 4=h4; Preformatado=pre',
+            table_default_styles: {
+                width: '100%',
+                borderCollapse: 'collapse'
+            }
+        });
+    } else {
+        console.error('TinyMCE não pôde ser carregado. Verifique a conexão com o CDN.');
+    }
+
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function() {
+            if (typeof tinymce !== 'undefined') {
+                tinymce.triggerSave();
+            }
+        });
     }
 });
 </script>
+@endpush
 @endsection
