@@ -575,8 +575,8 @@
             position: relative !important;
             width: 100% !important;
             max-width: 100% !important;
-            height: 400px !important;
-            margin: 0 auto 50px auto !important;
+            height: 350px !important;
+            margin: 0 !important;
             overflow: hidden !important;
             border-radius: 20px !important;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15) !important;
@@ -642,11 +642,13 @@
             display: flex !important;
             transition: transform 0.5s ease-in-out !important;
             overflow: hidden !important;
+            height: 100% !important;
+            width: 100% !important;
         }
         
         .carrossel .slide {
             min-width: 100% !important;
-            height: 400px !important;
+            height: 100% !important;
             position: relative !important;
             flex: 0 0 100% !important;
             max-width: 100% !important;
@@ -661,8 +663,10 @@
         .carrossel .slide img {
             width: 100% !important;
             height: 100% !important;
-            object-fit: cover !important;
+            object-fit: contain !important;
+            object-position: center !important;
             display: block !important;
+            background: #f8fafc !important;
         }
         
         .carrossel .seta {
@@ -844,17 +848,34 @@
             opacity: 1 !important;
         }
         
-        /* Forçar alinhamento perfeito em todos os dispositivos */
-        @media (max-width: 1024px) {
-            .carrossel,
-            .carrossel-mobile {
+        /* Forçar alinhamento perfeito em todos os dispositivos DESKTOP */
+        @media (min-width: 769px) and (max-width: 1920px) {
+            .carrossel {
                 width: 100% !important;
                 max-width: 100% !important;
-                margin-left: auto !important;
-                margin-right: auto !important;
+                margin: 0 !important;
                 left: auto !important;
                 right: auto !important;
                 transform: none !important;
+                height: 350px !important;
+            }
+            
+            .carrossel .slide {
+                height: 100% !important;
+            }
+            
+            .carrossel .slide img {
+                object-fit: contain !important;
+                object-position: center !important;
+            }
+        }
+        
+        /* Para telas muito largas (ultrawide) */
+        @media (min-width: 1921px) {
+            .carrossel {
+                max-width: 100% !important;
+                margin: 0 !important;
+                height: 400px !important;
             }
         }
         
@@ -867,9 +888,20 @@
         .banner-container {
             width: 100% !important;
             max-width: 100% !important;
-            margin: 0 auto !important;
+            margin: 0 !important;
             padding: 0 !important;
             overflow: visible !important;
+        }
+        
+        /* Remover espaçamento do container principal */
+        .max-w-8xl {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        /* Remover espaçamento entre banner e stories */
+        .container-stories {
+            margin-top: 10px !important;
         }
         
         /* Estilos críticos para Produtos e Serviços */
@@ -1371,9 +1403,9 @@
 @endpush
 
 @section('content')
-    <div class="max-w-8xl mx-auto px-4">
+    <div class="max-w-8xl mx-auto">
         <!-- SLIDER / BANNER PRINCIPAL desktop e tablet -->
-        <div class="carrossel pt-5">
+        <div class="carrossel">
             <div class="slides">
                 @foreach($banners as $index => $banner)
                 <div class="slide {{ $index === 0 ? 'ativo' : '' }}">

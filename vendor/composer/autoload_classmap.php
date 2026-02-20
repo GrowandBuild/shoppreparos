@@ -4348,7 +4348,6 @@ return array(
     'PHPUnit\\Util\\Xml' => $vendorDir . '/phpunit/phpunit/src/Util/Xml/Xml.php',
     'PHPUnit\\Util\\Xml\\Loader' => $vendorDir . '/phpunit/phpunit/src/Util/Xml/Loader.php',
     'PHPUnit\\Util\\Xml\\XmlException' => $vendorDir . '/phpunit/phpunit/src/Util/Exception/XmlException.php',
-    'ParaTest\\Coverage\\CoverageMerger' => $vendorDir . '/brianium/paratest/src/Coverage/CoverageMerger.php',
     'ParaTest\\JUnit\\LogMerger' => $vendorDir . '/brianium/paratest/src/JUnit/LogMerger.php',
     'ParaTest\\JUnit\\MessageType' => $vendorDir . '/brianium/paratest/src/JUnit/MessageType.php',
     'ParaTest\\JUnit\\TestCase' => $vendorDir . '/brianium/paratest/src/JUnit/TestCase.php',
