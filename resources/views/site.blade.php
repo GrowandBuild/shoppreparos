@@ -576,7 +576,7 @@
             width: 100% !important;
             max-width: 100% !important;
             height: 350px !important;
-            margin: 0 !important;
+            margin: 0 0 30px 0 !important;
             overflow: hidden !important;
             border-radius: 20px !important;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15) !important;
@@ -893,15 +893,9 @@
             overflow: visible !important;
         }
         
-        /* Remover espaçamento do container principal */
-        .max-w-8xl {
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-        
         /* Remover espaçamento entre banner e stories */
         .container-stories {
-            margin-top: 10px !important;
+            margin-top: 20px !important;
         }
         
         /* Estilos críticos para Produtos e Serviços */
@@ -1403,9 +1397,9 @@
 @endpush
 
 @section('content')
-    <div class="max-w-8xl mx-auto">
+    <div class="max-w-8xl mx-auto px-6">
         <!-- SLIDER / BANNER PRINCIPAL desktop e tablet -->
-        <div class="carrossel">
+        <div class="carrossel pt-6">
             <div class="slides">
                 @foreach($banners as $index => $banner)
                 <div class="slide {{ $index === 0 ? 'ativo' : '' }}">
